@@ -1,4 +1,5 @@
 import expess from "express";
+import mongodb, { Collection } from "mongodb";
 
 const book = [
     {
@@ -72,7 +73,34 @@ app.get("/get-book/:id", (req, res) => {
     })
 })
 
+//! DELETE A book 
+app.delete("/delete-book/:id", (req, res) => {
+    let bookID = Number(req.params.id);
+    let index = books.findIndex((ele) => { ele.id === bookID })
+    if (index === -1) {
+        res.status(400).json({
+            message: "book not found",
+        })
+    }
+    book.splice(index, 1);
+
+    res.status(200).json({
+        message: "book deleted ",
+        data: book
+    })
+})
+
+// mongodb 
+async function connectDB() {
+    let client = await mongodb.MongoClient.connect("mongodb://localhost:27017");
+    let database = client.db("TASK_04");
+    let book = await database.collections("Books");
+    return book;
+}
+
+
 app.listen(port, (err) => {
     if (err) console.log(err);
     console.log("Server Start at 9000");
+    connectDB();
 })
