@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config({ quiet: true });
 import express from "express";
-import {connectdb} from "./config/database.js"
-
+import { connectdb } from "./config/database.js";
+import bookRoutes from "./routes/book-routes.js"
 
 const app = express();
 let PORT = process.env.PORT || 9000;
@@ -14,6 +14,7 @@ connectdb()
 app.use(express.json());
 
 //! Routes
+app.use("v1/api", bookRoutes);
 
 app.listen(PORT, (err) => {
     if (err) console.log(err);
