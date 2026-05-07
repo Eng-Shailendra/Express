@@ -1,0 +1,61 @@
+# Authentication
+
+<!-- User regester -->
+
+## To Register user use this link
+
+http://localhost:5000/api/v1/auth/register
+register user with the following data
+
+```json
+{
+  "username": "Enter your username",
+  "email": "Enter your email",
+  "password": "Enter your password"
+}
+```
+
+## after register get the eamil for veryfication or can ues the token for veryfication
+
+## to verify email use this link
+
+http://localhost:5000/api/v1/auth/verify-email
+
+with the following data
+```
+{token}
+
+```
+
+<!--End of user regester -->
+
+<!-- User login -->
+
+## To login user use this link 🔥💧
+
+http://localhost:5000/api/v1/auth/login
+
+Login user with the fiollowing data
+
+```json
+{
+  "email": "Enter your Eamil",
+  "password": "Enter your password"
+}
+```
+
+after Login session will start and you can access the protect route with the token
+
+## Forgot password
+
+to reset pssword use this link
+http://localhost:5000/api/v1/auth/forgotpassword
+with the following data
+
+```json
+{
+  "email": "Enter your email"
+}
+```
+
+

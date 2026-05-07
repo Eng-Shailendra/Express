@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 export const verifiymail = async (token, email) => {
 
-    const filepath = path.join(import.meta.dirname, "verify-mail.html");
+    const filepath = path.join(import.meta.dirname, "template.hbs");
     const emailTemplateSource = fs.readFileSync(filepath, "utf-8")
 
     const template = handlebars.compile(emailTemplateSource);
@@ -23,11 +23,11 @@ export const verifiymail = async (token, email) => {
             from: process.env.MAIL_USER,
             to: email,
             subject: "Verify your email",
-            html: htmlToSend
+            html: htmlToSend,
         });
         console.log("Verification email sent successfully");
     } catch (error) {
-        
+
         console.log("Error sending email: ", error);
     }
 }
