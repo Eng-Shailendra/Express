@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 8082;
 
 connectDB();
 
+//! middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/v1/api", userRouters);
@@ -22,6 +23,6 @@ app.use("/v1/api", userRouters);
 app.listen(PORT, (err) => {
     if (err)
         console.log(err);
-    console.log("server stated seccesfully ");
+    console.log("Server stated successfully 🚀");
 
 })

@@ -34,52 +34,17 @@ export async function RegisterUser(req, res) {
         //! Generate JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "10m" });
         user.token = token;
-        await user.save();
 
-        res.status(201).json({
-            success: true,
-            message: "User registered successfully",
-            data: user
-        });
-
-        // Email verification
+        //! Email verification
         verifiymail(token, email);
         user.token = token;
         await user.save();
 
-        // Cheack user is verify or not
-        if (!user.isVerified) {
-            return res.status(400).json({
-                success: false,
-                message: "User not verified cheeck email for verification ✔"
-            });
-        }
-
-        const existingSession = await Session.findOne({ UserId: user._id });
-        if (existingSession) {
-            await Session.deleteOne({ UserId: user._id });
-        }
-
-        // ! create new session 
-        const session = await Session.create({ UserId: user._id })
-
-        //! create access token 
-        const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "30d",
-        })
-
-
-        const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "30d",
-        })
-
-        user.isLogin = true;
-        await user.save();
-
-        // return res.status(200).json({
-        //     success: true,
-        //     message: `Wellcome back ${username}`
-        // });
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully cheack email for verification",
+            data: user
+        });
     } catch (err) {
         console.log(err)
         res.status(500).json({
@@ -87,7 +52,6 @@ export async function RegisterUser(req, res) {
             message: "Server Error"
         });
     };
-
 }
 
 
@@ -140,8 +104,59 @@ export const emailVerification = async (req, res) => {
 
 export async function LoginUser(req, res) {
     try {
+        const { email, password } = req.body
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            })
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email ",
+            })
+        }
+        const match = await bcrypt.compare(password, user.password);
 
+        if (!match) {
+            return res.status(400).json({
+                success: false,
+                message: "Password is incorrect",
+            })
+        }
+
+        if (!user.isVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "User not verified. Please Register first, check your email for verification",
+            })
+        }
+
+        const existingSession = await Session.findOne({ userId: user._id });
+        if (existingSession) {
+            await Session.deleteOne({ userId: user._id });
+        }
+        await Session.create({ userId: user._id });
+
+        const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "10d" });
+
+        const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+
+        user.isLogin = true;
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: `Wellcome back user ${user.username}`,
+            accessToken,
+            refreshToken,
+            user: {
+                username: user.username
+            }
+        })
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Server Error"
@@ -153,12 +168,13 @@ export async function LoginUser(req, res) {
 //! Logout
 export const logout = async (req, res) => {
     try {
-        const userId = req.userId
+        const userId = req.userId  // userId will come from -> authMiddleware
         const sessionPromise = await Session.deleteMany({ userId })
-        const userProminse = await user.findByIdAndUpdate(userId, { isLogin: false });
+        const userProminse = await User.findByIdAndUpdate(userId, { isLogin: false });
 
-        promises.allSetteld([userProminse, sessionPromise]).then(
-            () => {
+        Promise.allSettled([userProminse, sessionPromise]).then(
+            (data) => {
+                console.log(data);
                 return res.status(200).json({
                     success: true,
                     message: "Logged out successfully ",
@@ -189,15 +205,15 @@ export const forgotPassword = async (req, res) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
-        user.otp = otp
-        user.otpExpiry = expiry
+        user.otp = otp;
+        user.otpExpires = expiry;
         await user.save();
 
         await sendOtpMail(email, otp);
         return res.status(200).json({
             success: true,
             message: `OTP sent successfully ${email}`
-        })
+        });
 
     } catch (err) {
         res.status(500).json({
@@ -205,5 +221,111 @@ export const forgotPassword = async (req, res) => {
             message: "Somethig went wrong"
         })
 
+    }
+}
+
+
+export const verifiyOtp = async (req, res) => {
+    try {
+        const { otp } = req.body
+        const email = req.params.email;
+
+        if (!otp) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP is not found"
+            })
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        if (!user.otp || !user.otpExpires) {
+            return res.status(400).json({
+                success: false,
+                message: "Otp not generated or already verified"
+            })
+        }
+        if (user.otpExpires < new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: "Otp has expire, Please request new otp"
+            });
+        }
+
+        if (otp !== user.otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter valid otp"
+            });
+        }
+        user.otp = null;
+        user.otpExpiry = null
+        await user.save();
+        return res.status(200).json({
+            success: true,
+            message: "OTP verified successfully"
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+
+}
+
+
+
+//! Change password
+
+export const updatePassword = async (req, res) => {
+    try {
+        const { newpassword, conformpassword } = req.body;
+        const email = req.params.email;
+
+        if (!newpassword || !conformpassword) {
+            return res.status(400).json({
+                success: false,
+                message: "All fileds are requrired"
+            })
+        }
+
+        if (newpassword !== conformpassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Password miss match"
+            })
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Password miss match"
+            })
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newpassword, salt);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Password change successfully",
+        })
+
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        })
     }
 }
