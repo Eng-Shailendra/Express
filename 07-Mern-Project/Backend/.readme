@@ -4,7 +4,7 @@
 
 ## To Register user use this link
 
-http://localhost:5000/api/v1/auth/register
+http://localhost:8080/api/v1/auth/register
 register user with the following data
 
 ```json
@@ -19,9 +19,10 @@ register user with the following data
 
 ## to verify email use this link
 
-http://localhost:5000/api/v1/auth/verify-email
+http://localhost:8080/api/v1/auth/verify-email
 
 with the following data
+
 ```
 {token}
 
@@ -31,15 +32,14 @@ with the following data
 
 <!-- User login -->
 
-## To login user use this link 🔥💧
+## To login user use this link 💧
 
-http://localhost:5000/api/v1/auth/login
-
-Login user with the fiollowing data
+http://localhost:8080/api/v1/auth/login
+Login user with the following data
 
 ```json
 {
-  "email": "Enter your Eamil",
+  "email": "Enter your Email",
   "password": "Enter your password"
 }
 ```
@@ -48,8 +48,8 @@ after Login session will start and you can access the protect route with the tok
 
 ## Forgot password
 
-to reset pssword use this link
-http://localhost:5000/api/v1/auth/forgotpassword
+to reset password use this link
+http://localhost:8080/api/v1/auth/forgot-password
 with the following data
 
 ```json
@@ -58,4 +58,42 @@ with the following data
 }
 ```
 
+after submit the email you will get the reset password link in your email inbox
 
+## verify the otp
+
+http://localhost:8080/api/v1/auth/verify-otp/:email
+with the following data
+
+```json
+{
+  "otp": "Enter the otp you received in your email"
+}
+```
+
+## Confirm password
+
+to reset password use this link
+http://localhost:8080/api/v1/auth/confirm-password/:email
+with the following data
+
+```json
+{
+  "newpassword": "Enter your new password",
+  "confirmpassword": "Enter your new password"
+}
+```
+
+## Logout user
+
+to logout user use this link
+http://localhost:8080/api/v1/auth/logout
+
+pass the header authorization with the token
+token will the access token that you received after login or register
+
+```json
+{
+  "Authorization": "Bearer {token}"
+}
+```
