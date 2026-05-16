@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { api } from "../Config/axiosInstance";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 const SignupPage = () => {
   const [formdata, setFormdata] = useState({
     username: "",
@@ -11,11 +14,19 @@ const SignupPage = () => {
     setFormdata({ ...formdata, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formdata);
-    api.post("/register", formdata);
-    
+    try {
+      const resp = await api.post("/register", formdata);
+      console.log(resp);
+      if (resp.data.success) {
+        navigate("/verify-email");
+        toast.success(resp.data.message);
+      }
+    } catch (err) {
+      toast.error(err.response.data.message);
+    }
   };
   return (
     <>
@@ -61,7 +72,7 @@ const SignupPage = () => {
                 <p className="text-amber-300">Already have an account? </p>
                 <button>Log in</button>
               </span>
-              <button className="btn" onClick={handleSubmit}>
+              <button type="button" className="btn" onClick={handleSubmit}>
                 Sign Up 🚀
               </button>
             </div>

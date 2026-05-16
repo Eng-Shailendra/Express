@@ -3,14 +3,21 @@ dotenv.config({ quiet: true });
 import express from "express";
 import { connectDB } from "./config/databse.js"
 import userRouters from "./routers/user-router.js";
+import cors from "cors"
 
 const app = express();
-const PORT = process.env.PORT || 8082;
+const PORT = process.env.PORT;
 
 
 
 
 connectDB();
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+}))
+
 
 //! middleware
 app.use(express.json());

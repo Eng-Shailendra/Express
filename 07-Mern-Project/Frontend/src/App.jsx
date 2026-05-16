@@ -9,6 +9,7 @@ import SignupPage from "./pages/SignupPage";
 import VerifiyEmail from "./pages/VerifiyEmail";
 import VerifiyOTP from "./pages/VerifiyOTP";
 import ProtectedRoute from "./Component/ProtectedRoute";
+import Verify from "./pages/Verify";
 function App() {
   const [count, setCount] = useState(0);
 
@@ -31,7 +32,7 @@ function App() {
     },
     {
       path: "/verify/:token",
-      element: <Home />,
+      element: <Verify />,
     },
     {
       path: "/verify-email",
