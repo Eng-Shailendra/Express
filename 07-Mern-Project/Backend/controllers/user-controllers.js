@@ -46,7 +46,6 @@ export async function RegisterUser(req, res) {
             data: user
         });
     } catch (err) {
-        console.log(err)
         res.status(500).json({
             success: false,
             message: "Server Error"
@@ -58,7 +57,7 @@ export async function RegisterUser(req, res) {
 export const emailVerification = async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
-        console.log(authHeader);
+        
         if (!authHeader || !authHeader.startsWith("Bearer")) {
             return res.status(400).json({
                 success: false,
