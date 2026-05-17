@@ -2,9 +2,10 @@ import React from "react";
 import { createContext, useState } from "react";
 import { useContext } from "react";
 
-export const UserConstext = createContext(null);
+export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
+  console.log(children);
   const [user, setUser] = useState(null);
 
   return (
@@ -14,4 +15,4 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-export const getUser = () => useContext(UserConstext);
+export const getUser = () => useContext(UserContext);

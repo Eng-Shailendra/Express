@@ -4,6 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { api } from "../Config/axiosInstance";
+import { UserProvider } from "../Context/UserContext";
 
 const LoginPage = () => {
   const [logindata, setLogindata] = useState({
@@ -21,9 +22,8 @@ const LoginPage = () => {
     try {
       const resp = await api.post("/login", logindata);
       console.log(resp.data);
-
-      
-      localStorage()
+      localStorage.setItem("accessToken", resp.data);
+      sessionStorage.setItem("username", resp.data.user.name);
       navigate("/");
       toast.success(resp.data.message);
     } catch (err) {
