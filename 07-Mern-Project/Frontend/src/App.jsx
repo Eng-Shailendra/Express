@@ -10,6 +10,8 @@ import VerifiyEmail from "./pages/VerifiyEmail";
 import VerifiyOTP from "./pages/VerifiyOTP";
 import ProtectedRoute from "./Component/ProtectedRoute";
 import Verify from "./pages/Verify";
+import ForgotPassword from "./pages/ForgotPassword";
+import ChangePassword from "./pages/ChangePassword";
 function App() {
   const [count, setCount] = useState(0);
 
@@ -39,8 +41,16 @@ function App() {
       element: <VerifiyEmail />,
     },
     {
-      path: "/verify-otp",
+      path: "/forgot-password",
+      element: <ForgotPassword />,
+    },
+    {
+      path: "/verify-otp/:email",
       element: <VerifiyOTP />,
+    },
+    {
+      path: "/change-password/:email",
+      element: <ChangePassword />,
     },
   ]);
 

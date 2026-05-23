@@ -5,13 +5,16 @@ import { useContext } from "react";
 export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
-  console.log(children);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const userData = localStorage.getItem("userData");
+
+    return userData ? JSON.parse(userData) : null;
+  });
 
   return (
-    <UserConstext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser }}>
       {children}
-    </UserConstext.Provider>
+    </UserContext.Provider>
   );
 };
 

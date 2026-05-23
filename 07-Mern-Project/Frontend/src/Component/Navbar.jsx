@@ -1,10 +1,38 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { getUser } from "../Context/UserContext";
+import { api } from "../Config/axiosInstance";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
-  const [openMenu, setOpenMenu] = useState(false);
-  const [isloggin, setIsLogin] = useState(false);
+  let { user, setUser } = getUser();
+  const accessToken = user?.accessToken;
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      if (!accessToken) return;
+      let resp = await api.post(
+        "/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      if (resp.data.success) {
+        setUser(null);
+        localStorage.removeItem("userData");
+        navigate("/login");
+        toast(resp.data.message);
+      }
+    } catch (err) {
+      toast(err.message);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md">
@@ -16,90 +44,17 @@ const Navbar = () => {
         {/* //! have to add  search seccestion */}
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex ">
-          <ul className=" flex items-center gap-6">
-            {/* Home */}
-            <li>
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  isActive ? "isActive" : "isInactive"
-                }
-              >
-                Home
-              </NavLink>
-            </li>
-
-            {/* Login link */}
-            <li>
-              <NavLink
-                to="/Login"
-                className={({ isActive }) =>
-                  isActive ? "isActive" : "isInactive"
-                }
-              >
-                login
-              </NavLink>
-            </li>
-            {/* Signup link */}
-            <li>
-              <NavLink
-                to="/signup"
-                className={({ isActive }) =>
-                  isActive ? "isActive" : "isInactive"
-                }
-              >
-                Sign Up
-              </NavLink>
-            </li>
-          </ul>
-        </div>
-
-        {/* Menu button  */}
-        <button className="md:hidden" onClick={() => setOpenMenu(!openMenu)}>
-          {openMenu ? <X size={30} /> : <Menu size={30} />}
-        </button>
-
-        {/* Mobile menu  */}
-        {openMenu && (
-          <div className="md:hidden bg-white shadow-lg px-6 py-4 ">
-            <ul className="flex flex-col gap-4">
-              {/* Home link */}
-              <li>
-                <NavLink
-                  to="/"
-                  className={({ isActive }) =>
-                    isActive ? "isActive" : "isInactive"
-                  }
-                >
-                  Home
-                </NavLink>
-              </li>
-              {/* Login link */}
-              <li>
-                <NavLink
-                  to="/Login"
-                  className={({ isActive }) =>
-                    isActive ? "isActive" : "isInactive"
-                  }
-                >
-                  login
-                </NavLink>
-              </li>
-              {/* Signup link */}
-              <li>
-                <NavLink
-                  to="/signup"
-                  className={({ isActive }) =>
-                    isActive ? "isActive" : "isInactive"
-                  }
-                >
-                  Sign Up
-                </NavLink>
-              </li>
-            </ul>
+        <div className="flex gap-3 items-center ">
+          <div
+            title={user.username}
+            className=" h-10 w-10 cursor-pointer  rounded-full border border-gray-300 font-bold text-xl bg-gray-100 flex items-center justify-center text-blue-800"
+          >
+            {user.username.charAt(0).toUpperCase()}
           </div>
-        )}
+          <button onClick={handleLogout} className="btn py-4 font-bold">
+            logout
+          </button>
+        </div>
       </div>
     </nav>
   );

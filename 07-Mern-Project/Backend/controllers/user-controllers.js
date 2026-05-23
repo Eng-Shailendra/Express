@@ -57,7 +57,7 @@ export async function RegisterUser(req, res) {
 export const emailVerification = async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
-        
+
         if (!authHeader || !authHeader.startsWith("Bearer")) {
             return res.status(400).json({
                 success: false,
@@ -173,7 +173,6 @@ export const logout = async (req, res) => {
 
         Promise.allSettled([userProminse, sessionPromise]).then(
             (data) => {
-                console.log(data);
                 return res.status(200).json({
                     success: true,
                     message: "Logged out successfully ",
@@ -195,9 +194,9 @@ export const forgotPassword = async (req, res) => {
         const user = await User.findOne({ email })
 
         if (!user) {
-            res.status(400).json({
+            return res.status(400).json({
                 success: false,
-                message: "Somethig went wrong"
+                message: "User not found"
             })
         }
 
@@ -207,8 +206,7 @@ export const forgotPassword = async (req, res) => {
         user.otp = otp;
         user.otpExpires = expiry;
         await user.save();
-
-        await sendOtpMail(email, otp);
+        sendOtpMail(email, otp);
         return res.status(200).json({
             success: true,
             message: `OTP sent successfully ${email}`
@@ -285,17 +283,17 @@ export const verifiyOtp = async (req, res) => {
 
 export const updatePassword = async (req, res) => {
     try {
-        const { newpassword, conformpassword } = req.body;
+        const { newpassword, confirmpassword } = req.body;
         const email = req.params.email;
 
-        if (!newpassword || !conformpassword) {
+        if (!newpassword || !confirmpassword) {
             return res.status(400).json({
                 success: false,
                 message: "All fileds are requrired"
             })
         }
 
-        if (newpassword !== conformpassword) {
+        if (newpassword !== confirmpassword) {
             return res.status(400).json({
                 success: false,
                 message: "Password miss match"
